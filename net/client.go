@@ -8,7 +8,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"strconv"
 	"time"
 )
@@ -21,8 +20,11 @@ func Request(method, url string, headers map[string]string, body io.Reader, time
 	}
 
 	client := &http.Client{
-		Timeout:   time.Millisecond * time.Duration(timeout),
 		Transport: transport,
+	}
+
+	if timeout > 0 {
+		client.Timeout = time.Millisecond * time.Duration(timeout)
 	}
 
 	req, err := http.NewRequest(method, url, body)
@@ -73,6 +75,7 @@ func HttpGet(url string, refer string, headers map[string]string, timeout int) (
 	}
 
 	var reader io.ReadCloser
+
 	switch resp.Header.Get("Content-Encoding") {
 	case "gzip":
 		reader, _ = gzip.NewReader(resp.Body)
@@ -159,8 +162,7 @@ func HttpPost(url string, refer string, headers map[string]string, params string
 	return resp.StatusCode, string(body), nil
 }
 
-//PostFrom
-func HttpPostFrom(url string, refer string, headers map[string]string, params url.Values, timeout int) (int, string, error) {
+func HttpPut(url string, refer string, headers map[string]string, params string, timeout int) (int, string, error) {
 	if headers == nil {
 		headers = make(map[string]string)
 	}
@@ -169,7 +171,46 @@ func HttpPostFrom(url string, refer string, headers map[string]string, params ur
 		headers["Referer"] = refer
 	}
 
-	resp, err := Request("POST", url, headers, bytes.NewBuffer([]byte(params.Encode())), timeout)
+	resp, err := Request("PUT", url, headers, bytes.NewBuffer([]byte(params)), timeout)
+
+	if err != nil {
+		return -1, "", err
+	}
+
+	var reader io.ReadCloser
+
+	switch resp.Header.Get("Content-Encoding") {
+	case "gzip":
+		reader, _ = gzip.NewReader(resp.Body)
+	case "deflate":
+		reader = flate.NewReader(resp.Body)
+	default:
+		reader = resp.Body
+	}
+
+	defer resp.Body.Close()
+	defer reader.Close()
+
+	body, err := ioutil.ReadAll(reader)
+
+	if err != nil {
+		return -1, "", err
+	}
+
+	return resp.StatusCode, string(body), nil
+}
+
+// Delete
+func HttpDelete(url string, refer string, headers map[string]string, timeout int) (int, string, error) {
+	if headers == nil {
+		headers = make(map[string]string)
+	}
+
+	if refer != "" {
+		headers["Referer"] = refer
+	}
+
+	resp, err := Request("DELETE", url, headers, nil, timeout)
 
 	if err != nil {
 		return -1, "", err
