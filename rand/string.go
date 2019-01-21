@@ -1,24 +1,17 @@
 package randutil
 
 import (
-	"crypto/rand"
-	"encoding/base64"
+	"math/rand"
 )
 
-func RandBytes(n int) ([]byte, error) {
-	data := make([]byte, n)
+func RandCharStr(n int) string {
+	bytesInit := []byte("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
-	_, err := rand.Read(data)
+	data := make([]byte, 0)
 
-	if err != nil {
-		return nil, err
+	for i := 0; i < n; i++ {
+		data = append(data, bytesInit[rand.Intn(len(bytesInit))])
 	}
 
-	return data, nil
-}
-
-func RandString(n int) (string, error) {
-	data, err := RandBytes(n)
-
-	return base64.URLEncoding.EncodeToString(data), err
+	return string(data)
 }
