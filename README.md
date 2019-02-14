@@ -18,3 +18,8 @@
 ### vers/vers.go
 	版本比对, 支持大于/小于
 	
+### zip/snappy.go
+	压缩算法, snappy算法（const中配置,大于指定大小使用压缩）
+	
+### zip/gzip.go
+	压缩算法, gzip算法（const中配置,大于指定大小使用压缩）
