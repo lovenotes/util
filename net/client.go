@@ -36,6 +36,28 @@ func NewHttpClient(timeout int) *HttpClient {
 	return httpClient
 }
 
+func NewHttpClientWithMaxIdleConns(maxidleconns, timeout int) *HttpClient {
+	httpClient := &HttpClient{}
+
+	transport := &http.Transport{
+		DisableCompression:  true,
+		TLSHandshakeTimeout: 10 * time.Second,
+		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
+
+		MaxIdleConns: maxidleconns,
+	}
+
+	httpClient._client = &http.Client{
+		Transport: transport,
+	}
+
+	if timeout > 0 {
+		httpClient._client.Timeout = time.Millisecond * time.Duration(timeout)
+	}
+
+	return httpClient
+}
+
 func (this *HttpClient) Request(method, url string, headers map[string]string, body io.Reader) (*http.Response, error) {
 	req, err := http.NewRequest(method, url, body)
 
