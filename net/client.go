@@ -12,21 +12,31 @@ import (
 	"time"
 )
 
-func Request(method, url string, headers map[string]string, body io.Reader, timeout int) (*http.Response, error) {
+type HttpClient struct {
+	_client *http.Client
+}
+
+func NewHttpClient(timeout int) *HttpClient {
+	httpClient := &HttpClient{}
+
 	transport := &http.Transport{
 		DisableCompression:  true,
 		TLSHandshakeTimeout: 10 * time.Second,
 		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
 	}
 
-	client := &http.Client{
+	httpClient._client = &http.Client{
 		Transport: transport,
 	}
 
 	if timeout > 0 {
-		client.Timeout = time.Millisecond * time.Duration(timeout)
+		httpClient._client.Timeout = time.Millisecond * time.Duration(timeout)
 	}
 
+	return httpClient
+}
+
+func (this *HttpClient) Request(method, url string, headers map[string]string, body io.Reader) (*http.Response, error) {
 	req, err := http.NewRequest(method, url, body)
 
 	if err != nil {
@@ -41,7 +51,7 @@ func Request(method, url string, headers map[string]string, body io.Reader, time
 	var resp *http.Response
 
 	for i := 0; i < retry; i++ {
-		resp, err = client.Do(req)
+		resp, err = this._client.Do(req)
 
 		if err != nil {
 			time.Sleep(100 * time.Millisecond)
@@ -59,7 +69,7 @@ func Request(method, url string, headers map[string]string, body io.Reader, time
 	return resp, nil
 }
 
-func HttpGet(url string, refer string, headers map[string]string, timeout int) (int, string, error) {
+func (this *HttpClient) HttpGet(url string, refer string, headers map[string]string) (int, string, error) {
 	if headers == nil {
 		headers = make(map[string]string)
 	}
@@ -68,7 +78,7 @@ func HttpGet(url string, refer string, headers map[string]string, timeout int) (
 		headers["Referer"] = refer
 	}
 
-	resp, err := Request("GET", url, headers, nil, timeout)
+	resp, err := this.Request("GET", url, headers, nil)
 
 	if err != nil {
 		return -1, "", err
@@ -97,7 +107,7 @@ func HttpGet(url string, refer string, headers map[string]string, timeout int) (
 	return resp.StatusCode, string(body), nil
 }
 
-func HttpGetLen(url string, refer string, headers map[string]string, timeout int) (int64, error) {
+func (this *HttpClient) HttpGetLen(url string, refer string, headers map[string]string) (int64, error) {
 	if headers == nil {
 		headers = make(map[string]string)
 	}
@@ -106,7 +116,7 @@ func HttpGetLen(url string, refer string, headers map[string]string, timeout int
 		headers["Referer"] = refer
 	}
 
-	resp, err := Request("GET", url, headers, nil, timeout)
+	resp, err := this.Request("GET", url, headers, nil)
 
 	if err != nil {
 		return 0, nil
@@ -124,7 +134,7 @@ func HttpGetLen(url string, refer string, headers map[string]string, timeout int
 }
 
 //Post
-func HttpPost(url string, refer string, headers map[string]string, params string, timeout int) (int, string, error) {
+func (this *HttpClient) HttpPost(url string, refer string, headers map[string]string, params string) (int, string, error) {
 	if headers == nil {
 		headers = make(map[string]string)
 	}
@@ -133,7 +143,7 @@ func HttpPost(url string, refer string, headers map[string]string, params string
 		headers["Referer"] = refer
 	}
 
-	resp, err := Request("POST", url, headers, bytes.NewBuffer([]byte(params)), timeout)
+	resp, err := this.Request("POST", url, headers, bytes.NewBuffer([]byte(params)))
 
 	if err != nil {
 		return -1, "", err
@@ -162,7 +172,7 @@ func HttpPost(url string, refer string, headers map[string]string, params string
 	return resp.StatusCode, string(body), nil
 }
 
-func HttpPut(url string, refer string, headers map[string]string, params string, timeout int) (int, string, error) {
+func (this *HttpClient) HttpPut(url string, refer string, headers map[string]string, params string) (int, string, error) {
 	if headers == nil {
 		headers = make(map[string]string)
 	}
@@ -171,7 +181,7 @@ func HttpPut(url string, refer string, headers map[string]string, params string,
 		headers["Referer"] = refer
 	}
 
-	resp, err := Request("PUT", url, headers, bytes.NewBuffer([]byte(params)), timeout)
+	resp, err := this.Request("PUT", url, headers, bytes.NewBuffer([]byte(params)))
 
 	if err != nil {
 		return -1, "", err
@@ -201,7 +211,7 @@ func HttpPut(url string, refer string, headers map[string]string, params string,
 }
 
 // Delete
-func HttpDelete(url string, refer string, headers map[string]string, timeout int) (int, string, error) {
+func (this *HttpClient) HttpDelete(url string, refer string, headers map[string]string) (int, string, error) {
 	if headers == nil {
 		headers = make(map[string]string)
 	}
@@ -210,7 +220,7 @@ func HttpDelete(url string, refer string, headers map[string]string, timeout int
 		headers["Referer"] = refer
 	}
 
-	resp, err := Request("DELETE", url, headers, nil, timeout)
+	resp, err := this.Request("DELETE", url, headers, nil)
 
 	if err != nil {
 		return -1, "", err
