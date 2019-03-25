@@ -1,8 +1,11 @@
 package submail
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
+
+	"github.com/json-iterator/go"
 )
 
 type SmsSend struct {
@@ -42,10 +45,10 @@ func (this *SmsSend) Send() (string, error) {
 	config["appkey"] = this.appKey
 	config["signType"] = this.signType
 
-	values := url.Values{}
+	params := url.Values{}
 
-	values.Set("appid", this.appId)
-	values.Set("to", this.to)
+	params.Set("appid", this.appId)
+	params.Set("to", this.to)
 
 	if this.signType != "normal" {
 		timestamp, err := GetTimestamp()
@@ -54,21 +57,39 @@ func (this *SmsSend) Send() (string, error) {
 			return "", err
 		}
 
-		values.Set("sign_type", this.signType)
-		values.Set("timestamp", fmt.Sprintf("%d", timestamp))
-		values.Set("sign_version", "2")
+		params.Set("sign_type", this.signType)
+		params.Set("timestamp", fmt.Sprintf("%d", timestamp))
+		params.Set("sign_version", "2")
 	}
 
 	if this.tag != "" {
-		values.Set("tag", this.tag)
+		params.Set("tag", this.tag)
 	}
 
-	signature := caculSign(values, config)
+	signature := caculSign(params, config)
 
-	values.Set("signature", signature)
+	params.Set("signature", signature)
 
 	//v2 数字签名 content 不参与计算
-	values.Set("content", this.content)
+	params.Set("content", this.content)
 
-	return HttpPost(SUBMAIL_SMS_SEND_URL, values.Encode())
+	respData, err := HttpPost(SUBMAIL_SMS_XSEND_URL, params.Encode())
+
+	if err != nil {
+		return "", err
+	}
+
+	smsResp := &SmsResp{}
+
+	err = jsoniter.Unmarshal([]byte(respData), smsResp)
+
+	if err != nil {
+		return "", err
+	}
+
+	if smsResp.Status != "success" {
+		return "", errors.New(smsResp.Msg)
+	}
+
+	return smsResp.SendId, nil
 }

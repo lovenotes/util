@@ -8,6 +8,17 @@ import (
 	"github.com/json-iterator/go"
 )
 
+type SmsResp struct {
+	Status string `json:"status"`
+	Code   string `json:"code"`
+	Msg    string `json:"msg"`
+
+	SendId     string `json:"send_id"`
+	To         string `json:"to"`
+	Fee        int    `json:"fee"`
+	SmsCredits int    `json:"sms_credits"`
+}
+
 func HttpGet(request string) (string, error) {
 	resp, err := http.Get(request)
 

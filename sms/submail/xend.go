@@ -1,6 +1,7 @@
 package submail
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 
@@ -85,5 +86,23 @@ func (this *SmsXSend) Xsend() (string, error) {
 		}
 	}
 
-	return HttpPost(SUBMAIL_SMS_XSEND_URL, params.Encode())
+	respData, err := HttpPost(SUBMAIL_SMS_XSEND_URL, params.Encode())
+
+	if err != nil {
+		return "", err
+	}
+
+	smsResp := &SmsResp{}
+
+	err = jsoniter.Unmarshal([]byte(respData), smsResp)
+
+	if err != nil {
+		return "", err
+	}
+
+	if smsResp.Status != "success" {
+		return "", errors.New(smsResp.Msg)
+	}
+
+	return smsResp.SendId, nil
 }

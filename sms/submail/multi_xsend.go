@@ -63,7 +63,7 @@ func (this *SmsMultiXSend) SetTag(tag string) {
 	this.tag = tag
 }
 
-func (this *SmsMultiXSend) MultiXsend() (string, error) {
+func (this *SmsMultiXSend) MultiXsend() ([]string, error) {
 	config := make(map[string]string)
 
 	config["appid"] = this.appId
@@ -79,7 +79,7 @@ func (this *SmsMultiXSend) MultiXsend() (string, error) {
 		timestamp, err := GetTimestamp()
 
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		params.Set("sign_type", this.signType)
@@ -99,10 +99,32 @@ func (this *SmsMultiXSend) MultiXsend() (string, error) {
 	data, err := jsoniter.Marshal(this.multi)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	params.Set("multi", string(data))
 
-	return HttpPost(SUBMAIL_SMS_MULTI_XSEND_URL, params.Encode())
+	respData, err := HttpPost(SUBMAIL_SMS_XSEND_URL, params.Encode())
+
+	if err != nil {
+		return nil, err
+	}
+
+	smsResps := make([]*SmsResp, 0)
+
+	err = jsoniter.Unmarshal([]byte(respData), &smsResps)
+
+	if err != nil {
+		return nil, err
+	}
+
+	mobiles := make([]string, 0)
+
+	for _, smsResp := range smsResps {
+		if smsResp.Status == "success" {
+			mobiles = append(mobiles, smsResp.To)
+		}
+	}
+
+	return mobiles, nil
 }
