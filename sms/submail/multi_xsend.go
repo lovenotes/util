@@ -43,9 +43,9 @@ func (this *SmsMulti) Get() map[string]interface{} {
 	return item
 }
 
-func NewSmsMultiXSend(appid, appkey, signtype string) *SmsMultiXSend {
+func NewSmsMultiXSend(appid int, appkey, signtype string) *SmsMultiXSend {
 	return &SmsMultiXSend{
-		appId:    appid,
+		appId:    fmt.Sprintf("%d", appid),
 		appKey:   appkey,
 		signType: signtype,
 	}

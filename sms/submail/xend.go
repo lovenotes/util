@@ -18,9 +18,9 @@ type SmsXSend struct {
 	tag     string
 }
 
-func NewSmsXsend(appid, appkey, signtype string) *SmsXSend {
+func NewSmsXsend(appid int, appkey, signtype string) *SmsXSend {
 	return &SmsXSend{
-		appId:    appid,
+		appId:    fmt.Sprintf("%d", appid),
 		appKey:   appkey,
 		signType: signtype,
 		vars:     make(map[string]string),

@@ -15,9 +15,9 @@ type SmsSend struct {
 	tag     string
 }
 
-func NewSmsSend(appid, appkey, signtype string) *SmsSend {
+func NewSmsSend(appid int, appkey, signtype string) *SmsSend {
 	return &SmsSend{
-		appId:    appid,
+		appId:    fmt.Sprintf("%d", appid),
 		appKey:   appkey,
 		signType: signtype,
 	}
