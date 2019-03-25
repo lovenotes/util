@@ -118,13 +118,13 @@ func (this *SmsMultiXSend) MultiXsend() ([]string, error) {
 		return nil, err
 	}
 
-	mobiles := make([]string, 0)
+	recvs := make([]string, 0)
 
 	for _, smsResp := range smsResps {
 		if smsResp.Status == "success" {
-			mobiles = append(mobiles, smsResp.To)
+			recvs = append(recvs, smsResp.To)
 		}
 	}
 
-	return mobiles, nil
+	return recvs, nil
 }

@@ -91,5 +91,5 @@ func (this *SmsSend) Send() (string, error) {
 		return "", errors.New(smsResp.Msg)
 	}
 
-	return smsResp.SendId, nil
+	return this.to, nil
 }
