@@ -18,11 +18,11 @@ type SmsXSend struct {
 	tag     string
 }
 
-func NewSmsXsend(config map[string]string) *SmsXSend {
+func NewSmsXsend(appid, appkey, signtype string) *SmsXSend {
 	return &SmsXSend{
-		appId:    config["appid"],
-		appKey:   config["appkey"],
-		signType: config["signType"],
+		appId:    appid,
+		appKey:   appkey,
+		signType: signtype,
 		vars:     make(map[string]string),
 	}
 }

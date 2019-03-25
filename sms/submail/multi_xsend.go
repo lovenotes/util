@@ -43,11 +43,12 @@ func (this *SmsMulti) Get() map[string]interface{} {
 	return item
 }
 
-func NewSmsMultiXSend(config map[string]string) *SmsMultiXSend {
+func NewSmsMultiXSend(appid, appkey, signtype string) *SmsMultiXSend {
 	return &SmsMultiXSend{
-		appId:    config["appid"],
-		appKey:   config["appkey"],
-		signType: config["signType"]}
+		appId:    appid,
+		appKey:   appkey,
+		signType: signtype,
+	}
 }
 
 func (this *SmsMultiXSend) SetProject(project string) {
