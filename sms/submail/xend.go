@@ -44,7 +44,7 @@ func (this *SmsXSend) SetTag(tag string) {
 	this.tag = tag
 }
 
-func (this *SmsXSend) Xsend() (string, error) {
+func (this *SmsXSend) XSend() (string, error) {
 	config := make(map[string]string)
 
 	config["appid"] = this.appId

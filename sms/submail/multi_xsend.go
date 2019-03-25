@@ -63,7 +63,7 @@ func (this *SmsMultiXSend) SetTag(tag string) {
 	this.tag = tag
 }
 
-func (this *SmsMultiXSend) MultiXsend() ([]string, error) {
+func (this *SmsMultiXSend) MultiXSend() ([]string, error) {
 	config := make(map[string]string)
 
 	config["appid"] = this.appId
