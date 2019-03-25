@@ -16,7 +16,7 @@ type SmsResp struct {
 	SendId     string `json:"send_id"`
 	To         string `json:"to"`
 	Fee        int    `json:"fee"`
-	SmsCredits int    `json:"sms_credits"`
+	SmsCredits string `json:"sms_credits"`
 }
 
 func HttpGet(request string) (string, error) {
