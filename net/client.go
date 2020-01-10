@@ -91,6 +91,36 @@ func (this *HttpClient) Request(method, url string, headers map[string]string, b
 	return resp, nil
 }
 
+func (this *HttpClient) HttpHead(url string, refer string, headers map[string]string) (int, int, error) {
+	if headers == nil {
+		headers = make(map[string]string)
+	}
+
+	if refer != "" {
+		headers["Referer"] = refer
+	}
+
+	resp, err := this.Request("HEAD", url, headers, nil)
+
+	if err != nil {
+		return -1, -1, err
+	}
+
+	srcContentLen := resp.Header.Get("Content-Length")
+
+	if srcContentLen == "" {
+		return resp.StatusCode, 0, nil
+	}
+
+	contentLen, err := strconv.ParseInt(srcContentLen, 10, 32)
+
+	if err != nil {
+		return -1, -1, err
+	}
+
+	return resp.StatusCode, int(contentLen), nil
+}
+
 func (this *HttpClient) HttpGet(url string, refer string, headers map[string]string) (int, string, error) {
 	if headers == nil {
 		headers = make(map[string]string)
