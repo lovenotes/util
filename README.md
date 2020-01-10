@@ -4,7 +4,7 @@
 	输出panic错误信息
 
 ### net/client.go
-    发送http请求(GET/POST)
+    发送http请求(GET/POST/HEAD/PUT/DELETE)
 
 ### net/http.go
 	获取request请求真实ip或port
